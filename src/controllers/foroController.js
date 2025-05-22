@@ -1,71 +1,71 @@
-import * as foroService from "../service/foroService.js"
+import * as foroService from "../service/foroService.js";
+import { broadcastForo, broadcastRespuesta } from "../service/realTime.js";
 
-export const abrirForo = async(req, res) => {
+export const abrirForo = async (req, res) => {
     try {
-        const {data, error} = await foroService.crearForo(req.body);
-        if(error) return res.status(400).json({message: "Error al abrir el foro: ", error});
-        res.status(201).json({data});
+        const { data, error } = await foroService.crearForo(req.body);
+        if (error) return res.status(400).json({ message: "Error al abrir el foro", error });
+        await broadcastForo(data[0]);
+        res.status(201).json({ data });
     } catch (error) {
         res.status(500).json(error.message);
     }
-}
+};
 
-export const getForos = async(req, res) => {
+export const getForos = async (req, res) => {
     try {
-        const{data, error} = await foroService.listarForos();
-        if(error) return res.status(400).json({message: "Error al obtener los foros: ", error});
+        const { data, error } = await foroService.listarForos();
+        if (error) return res.status(400).json({ message: "Error al obtener los foros", error });
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json(error.message);
     }
-}
+};
 
-export const getForoId = async(req, res) => {
+export const getForoId = async (req, res) => {
     try {
-        const {id} = req.params;
-        const {data, error} = await foroService.listarForoId(id); 
-        if(error) return res.status(400).json({message: "Error al obtener el foro: ", error});
-        if (!data) {
-            return res.status(404).json({ message: "Foro no encontrado" });
-        }
+        const { id } = req.params;
+        const { data, error } = await foroService.listarForoId(id);
+        if (error) return res.status(400).json({ message: "Error al obtener el foro", error });
+        if (!data) return res.status(404).json({ message: "Foro no encontrado" });
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json(error.message);
     }
-}
+};
 
-export const getForoCuentaId = async(req, res) => {
+export const getForoCuentaId = async (req, res) => {
     try {
-        const {id} = req.params;
-        const {data, error} = await foroService.listarForoIdCuenta(id); 
-        if(error) return res.status(400).json({message: "Error al obtener el foro: ", error});
+        const { id } = req.params;
+        const { data, error } = await foroService.listarForoIdCuenta(id);
+        if (error) return res.status(400).json({ message: "Error al obtener el foro", error });
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json(error.message);
     }
-}
+};
 
-export const updateForo = async(req, res) => {
+export const updateForo = async (req, res) => {
     try {
-        const {id} = req.params;
-        const {data, error} = await foroService.actualizarForo(id, req.body);
-        if(error) return res.status(400).json({message: "Error al actualizar el foro: ", error});
-        res.status(201).json({message: "Foro actualizado correctamente", data});
+        const { id } = req.params;
+        const { data, error } = await foroService.actualizarForo(id, req.body);
+        if (error) return res.status(400).json({ message: "Error al actualizar el foro", error });
+        res.status(201).json({ message: "Foro actualizado correctamente", data });
     } catch (error) {
         res.status(500).json(error.message);
     }
-}
+};
 
-export const deleteForo = async(req, res) => {
+export const deleteForo = async (req, res) => {
     try {
-        const {id} = req.params;
-        const {data, error} = await foroService.eliminarForo(id);
-        if(error) return res.status(400).json({message: "Error al eliminar el foro: ", error});
-        res.status(200).json({message: "Foro eliminado correctamente", data});
+        const { id } = req.params;
+        const { data, error } = await foroService.eliminarForo(id);
+        if (error) return res.status(400).json({ message: "Error al eliminar el foro", error });
+        res.status(200).json({ message: "Foro eliminado correctamente", data });
     } catch (error) {
         res.status(500).json(error.message);
     }
-}
+};
 
 export const responderForo = async (req, res) => {
     try {
@@ -74,6 +74,8 @@ export const responderForo = async (req, res) => {
         const info = req.body;
         const { data, error } = await foroService.responderForo(idForo, idUsuario, info);
         if (error) return res.status(400).json({ message: "Error al responder el foro", error: error.message });
+        await broadcastRespuesta(data[0]);
+
         res.status(201).json({ message: "Respuesta creada con éxito", data });
     } catch (error) {
         res.status(500).json(error.message);
@@ -116,13 +118,13 @@ export const updateRespuesta = async (req, res) => {
     }
 };
 
-export const cantRespuestas = async(req, res) => {
+export const cantRespuestas = async (req, res) => {
     try {
-        const {id} = req.params;
-        const {data, error} = await foroService.cantidadRespuestasForo(id);
+        const { id } = req.params;
+        const { data, error } = await foroService.cantidadRespuestasForo(id);
         if (error) return res.status(400).json({ message: "Error al obtener la cantidad de respuestas", error: error.message });
         res.status(200).json(data);
     } catch (error) {
-        res.status(500).json(error.message)
+        res.status(500).json(error.message);
     }
-}
+};
