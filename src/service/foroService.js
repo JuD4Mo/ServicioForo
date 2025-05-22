@@ -39,8 +39,10 @@ export const responderForo = async(idForo, idUsuario, info) => {
     if (!mensaje) {
         throw new Error("El mensaje de la respuesta no puede estar vacío.");
     }
-
-    return await supabase.from('respuestas_foro').insert({idforo: idForo, idcuenta: idUsuario, mensaje}).select('*');  
+    return await supabase
+    .from('respuestas_foro')
+    .insert({ idforo: idForo, idcuenta: idUsuario, mensaje })
+    .select('idrespuesta, idforo, idcuenta, mensaje, fecha'); 
 };
 
 export const listarRespuestasForo = async(idForo) => {
