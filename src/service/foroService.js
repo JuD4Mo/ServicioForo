@@ -100,11 +100,11 @@ export const listarRespuestasForo = async(idForo) => {
 
 export const eliminarRespuesta = async(idRespuesta, idUsuario) => {
     return await supabase
-        .from('respuestas_foro')
-        .delete()
-        .eq('idrespuesta', idRespuesta)
-        .eq('idcuenta', idUsuario)
-        .select('*');
+    .from('respuestas_foro')
+    .delete()
+    .eq('idrespuesta', idRespuesta)
+    .eq('idcuenta', idUsuario)
+    .select('*');
 };
 
 export const editarRespuesta = async(idRespuesta, idUsuario, mensaje) => {
@@ -113,11 +113,11 @@ export const editarRespuesta = async(idRespuesta, idUsuario, mensaje) => {
     }
 
     return await supabase
-        .from('respuestas_foro')
-        .update({ mensaje })
-        .eq('idrespuesta', idRespuesta)
-        .eq('idcuenta', idUsuario)
-        .select('*');
+    .from('respuestas_foro')
+    .update({ mensaje })
+    .eq('idrespuesta', idRespuesta)
+    .eq('idcuenta', idUsuario)
+    .select('idrespuesta, idforo, idcuenta, mensaje, fecha')
 };
 
 export const cantidadRespuestasForo = async(idForo) => {

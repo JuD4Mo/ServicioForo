@@ -96,7 +96,10 @@ export const responderForo = async (req, res) => {
     respuesta.fecha = new Date().toISOString();
     }
 
-    await broadcastRespuesta(respuesta);
+    await broadcastRespuesta({
+    tipo: "nueva-respuesta",
+    respuesta
+    });
 
     res.status(201).json({ message: "Respuesta creada con éxito", data });
   } catch (error) {
@@ -121,6 +124,10 @@ export const deleteRespuesta = async (req, res) => {
         const idUsuario = req.body.idcuenta;
         const { data, error } = await foroService.eliminarRespuesta(idRespuesta, idUsuario);
         if (error) return res.status(400).json({ message: "Error al eliminar la respuesta", error: error.message });
+        await broadcastRespuesta({
+        tipo: "respuesta-eliminada",
+        respuesta: { idRespuesta }
+        });
         res.status(200).json({ message: "Respuesta eliminada correctamente", data });
     } catch (error) {
         res.status(500).json(error.message);
@@ -134,6 +141,10 @@ export const updateRespuesta = async (req, res) => {
         const { mensaje } = req.body;
         const { data, error } = await foroService.editarRespuesta(idRespuesta, idUsuario, mensaje);
         if (error) return res.status(400).json({ message: "Error al editar la respuesta", error: error.message });
+        await broadcastRespuesta({
+        tipo: "respuesta-editada",
+        respuesta: data[0] 
+        });
         res.status(200).json({ message: "Respuesta editada correctamente", data });
     } catch (error) {
         res.status(500).json(error.message);

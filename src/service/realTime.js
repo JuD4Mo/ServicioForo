@@ -9,4 +9,13 @@ const broadcastForo = async (evento) => {
   });
 };
 
+const broadcastRespuesta = async (evento) => {
+  await supabase.channel('respuestas-realtime').send({
+    type: 'broadcast',
+    event: 'evento-respuesta',
+    payload: evento
+  });
+};
+
+
 export { broadcastForo, broadcastRespuesta }; 
