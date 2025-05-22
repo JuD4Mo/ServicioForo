@@ -1,20 +1,11 @@
 import { supabase } from "../db/supaClient.js";
 
-const broadcastForo = async (nuevoForo) => {
-  console.log('Enviando foro a canal realtime...', nuevoForo);
+const broadcastForo = async (evento) => {
+  console.log('🛰️ Enviando evento foro realtime:', evento);
   await supabase.channel('foros-realtime').send({
     type: 'broadcast',
-    event: 'nuevo-foro',
-    payload: nuevoForo
-  });
-};
-
-
-const broadcastRespuesta = async (nuevaRespuesta) => {
-  await supabase.channel('respuestas-realtime').send({
-    type: 'broadcast',
-    event: 'nueva-respuesta',
-    payload: nuevaRespuesta
+    event: 'evento-foro',
+    payload: evento
   });
 };
 

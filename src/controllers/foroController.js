@@ -49,6 +49,13 @@ export const updateForo = async (req, res) => {
     try {
         const { id } = req.params;
         const { data, error } = await foroService.actualizarForo(id, req.body);
+        await broadcastForo({
+        tipo: "foro-actualizado",
+        foro: {
+            idforo: id,
+            ...req.body 
+        }
+        });
         if (error) return res.status(400).json({ message: "Error al actualizar el foro", error });
         res.status(201).json({ message: "Foro actualizado correctamente", data });
     } catch (error) {
@@ -61,6 +68,10 @@ export const deleteForo = async (req, res) => {
         const { id } = req.params;
         const { data, error } = await foroService.eliminarForo(id);
         if (error) return res.status(400).json({ message: "Error al eliminar el foro", error });
+        await broadcastForo({
+        tipo: "foro-eliminado",
+        foro: { idforo: id }
+        });
         res.status(200).json({ message: "Foro eliminado correctamente", data });
     } catch (error) {
         res.status(500).json(error.message);
@@ -81,11 +92,9 @@ export const responderForo = async (req, res) => {
 
     const respuesta = data[0];
 
-    
     if (!respuesta.fecha) {
-      respuesta.fecha = new Date().toISOString();
+    respuesta.fecha = new Date().toISOString();
     }
-
 
     await broadcastRespuesta(respuesta);
 

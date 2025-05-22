@@ -1,11 +1,33 @@
 import { supabase } from "../db/supaClient.js";
 
-export const crearForo = async(info) => {
-    const titulo = info.titulo;
-    const descripcion = info.descripcion;
-    const idcuenta = info.idcuenta;
-    return await supabase.from('foros').insert({titulo, descripcion, idcuenta}).select('*');
-}
+export const crearForo = async (info) => {
+  const { titulo, descripcion, idcuenta } = info;
+
+  
+  const { data: forosInsertados, error: errorInsert } = await supabase
+    .from('foros')
+    .insert({ titulo, descripcion, idcuenta })
+    .select('idforo, titulo, descripcion, idcuenta, fecha');
+
+  if (errorInsert || !forosInsertados || !forosInsertados[0]) {
+    return { data: null, error: errorInsert || new Error("No se insertó el foro") };
+  }
+
+  const foro = forosInsertados[0];
+
+  const { data: usuario, error: errorUsuario } = await supabase
+    .from('cuentas') 
+    .select('nombre')
+    .eq('idcuenta', foro.idcuenta)
+    .maybeSingle();
+
+  if (usuario?.nombre) {
+    foro.nombreUsuario = usuario.nombre;
+  }
+
+  return { data: [foro], error: null };
+};
+
 
 export const listarForos = async() => {
     return await supabase.from('foros').select('*');
@@ -33,17 +55,40 @@ export const eliminarForo = async(idForo) => {
     return await supabase.from('foros').delete('*').eq('idforo', idForo);
 }
 
-export const responderForo = async(idForo, idUsuario, info) => {
-    const mensaje = info.mensaje;
+export const responderForo = async (idForo, idUsuario, info) => {
+  const mensaje = info.mensaje;
 
-    if (!mensaje) {
-        throw new Error("El mensaje de la respuesta no puede estar vacío.");
-    }
-    return await supabase
+  if (!mensaje) {
+    throw new Error("El mensaje de la respuesta no puede estar vacío.");
+  }
+
+  
+  const { data: insertadas, error: errorInsert } = await supabase
     .from('respuestas_foro')
     .insert({ idforo: idForo, idcuenta: idUsuario, mensaje })
-    .select('idrespuesta, idforo, idcuenta, mensaje, fecha'); 
+    .select('idrespuesta, idforo, idcuenta, mensaje, fecha');
+
+  if (errorInsert || !insertadas || !insertadas[0]) {
+    return { data: null, error: errorInsert || new Error("No se insertó respuesta") };
+  }
+
+  const respuesta = insertadas[0];
+
+  
+  const { data: usuario, error: errorUsuario } = await supabase
+    .from('cuentas') 
+    .select('nombre')
+    .eq('idcuenta', idUsuario)
+    .maybeSingle();
+
+  
+  if (usuario?.nombre) {
+    respuesta.nombreUsuario = usuario.nombre;
+  }
+
+  return { data: [respuesta], error: null };
 };
+
 
 export const listarRespuestasForo = async(idForo) => {
     return await supabase
