@@ -68,18 +68,31 @@ export const deleteForo = async (req, res) => {
 };
 
 export const responderForo = async (req, res) => {
-    try {
-        const idForo = req.params.idforo;
-        const idUsuario = req.body.idcuenta;
-        const info = req.body;
-        const { data, error } = await foroService.responderForo(idForo, idUsuario, info);
-        if (error) return res.status(400).json({ message: "Error al responder el foro", error: error.message });
-        await broadcastRespuesta(data[0]);
+  try {
+    const idForo = req.params.idforo;
+    const idUsuario = req.body.idcuenta;
+    const info = req.body;
 
-        res.status(201).json({ message: "Respuesta creada con éxito", data });
-    } catch (error) {
-        res.status(500).json(error.message);
+    const { data, error } = await foroService.responderForo(idForo, idUsuario, info);
+
+    if (error || !data || !data[0]) {
+      return res.status(400).json({ message: "Error al responder el foro", error: error?.message || "Sin datos" });
     }
+
+    const respuesta = data[0];
+
+    
+    if (!respuesta.fecha) {
+      respuesta.fecha = new Date().toISOString();
+    }
+
+
+    await broadcastRespuesta(respuesta);
+
+    res.status(201).json({ message: "Respuesta creada con éxito", data });
+  } catch (error) {
+    res.status(500).json({ message: "Error interno al responder el foro", error: error.message });
+  }
 };
 
 export const getRespuestasForo = async (req, res) => {
