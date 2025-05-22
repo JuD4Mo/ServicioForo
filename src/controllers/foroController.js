@@ -126,7 +126,7 @@ export const deleteRespuesta = async (req, res) => {
         if (error) return res.status(400).json({ message: "Error al eliminar la respuesta", error: error.message });
         await broadcastRespuesta({
         tipo: "respuesta-eliminada",
-        respuesta: { idRespuesta }
+        respuesta: { idrespuesta: idRespuesta }
         });
         res.status(200).json({ message: "Respuesta eliminada correctamente", data });
     } catch (error) {

@@ -91,11 +91,11 @@ export const responderForo = async (idForo, idUsuario, info) => {
 
 
 export const listarRespuestasForo = async(idForo) => {
-    return await supabase
-        .from('respuestas_foro')
-        .select('*')
-        .eq('idforo', idForo)
-        .order('fecha', { ascending: true });
+  return await supabase
+    .from('respuestas_foro')
+    .select('idrespuesta, idforo, idcuenta, mensaje, fecha, cuentas(nombre)')
+    .eq('idforo', idForo)
+    .order('fecha', { ascending: true });
 };
 
 export const eliminarRespuesta = async(idRespuesta, idUsuario) => {
