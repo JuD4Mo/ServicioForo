@@ -38,7 +38,10 @@ export const listarForoId = async(idForo) => {
 }
 
 export const listarForoIdCuenta = async(idCuenta) => {
-    return await supabase.from('foros').select('*').eq('idcuenta', idCuenta);
+  return await supabase
+    .from('foros')
+    .select('idforo, titulo, descripcion, idcuenta, fecha, cuentas(nombre)')
+    .eq('idcuenta', idCuenta);
 }
 
 export const actualizarForo = async(idForo, info) => {
