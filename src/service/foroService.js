@@ -43,9 +43,17 @@ export const listarForos = async () => {
     `);
 };
 
-export const listarForoId = async(idForo) => {
-    return await supabase.from('foros').select('*').eq('idforo', idForo).maybeSingle();;
-}
+export const listarForoId = async (idForo) => {
+  return await supabase
+    .from('foros')
+    .select(`
+      *,
+      cuentas(nombre),
+      respuestas_foro(idrespuesta)
+    `)
+    .eq('idforo', idForo)
+    .maybeSingle();
+};
 
 export const listarForoIdCuenta = async(idCuenta) => {
   return await supabase
