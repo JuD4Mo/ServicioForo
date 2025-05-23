@@ -29,9 +29,19 @@ export const crearForo = async (info) => {
 };
 
 
-export const listarForos = async() => {
-    return await supabase.from('foros').select('*');
-}
+export const listarForos = async () => {
+  return await supabase
+    .from('foros')
+    .select(`
+      idforo,
+      titulo,
+      descripcion,
+      idcuenta,
+      fecha,
+      cuentas(nombre),
+      respuestas_foro(idrespuesta)
+    `);
+};
 
 export const listarForoId = async(idForo) => {
     return await supabase.from('foros').select('*').eq('idforo', idForo).maybeSingle();;
@@ -40,7 +50,7 @@ export const listarForoId = async(idForo) => {
 export const listarForoIdCuenta = async(idCuenta) => {
   return await supabase
     .from('foros')
-    .select('idforo, titulo, descripcion, idcuenta, fecha, cuentas(nombre)')
+    .select('idforo, titulo, descripcion, idcuenta, fecha, cuentas(nombre)', 'respuestas_foro(idrespuesta)')
     .eq('idcuenta', idCuenta);
 }
 
