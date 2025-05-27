@@ -147,8 +147,6 @@ export const eliminarRespuestaConHijos = async (idRespuesta) => {
 
   recolectarDescendientes(Number(idRespuesta));
 
-  console.log("🗑️ Eliminando en orden:", idsAEliminar);
-
   // 4. Eliminar en orden: hijos → padre
   const { data, error } = await supabase
     .from('respuestas_foro')
