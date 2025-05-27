@@ -40,7 +40,8 @@ export const listarForos = async () => {
       fecha,
       cuentas(nombre),
       respuestas_foro(idrespuesta)
-    `);
+    `)
+    .order('idforo', { ascending: false });
 };
 
 export const listarForoId = async (idForo) => {
@@ -116,7 +117,7 @@ export const listarRespuestasForo = async(idForo) => {
     .from('respuestas_foro')
     .select('idrespuesta, idforo, idcuenta, mensaje, fecha, cuentas(nombre)')
     .eq('idforo', idForo)
-    .order('fecha', { ascending: false });
+    .order('fecha', { ascending: true });
 };
 
 export const eliminarRespuestaConHijos = async (idRespuesta) => {
@@ -183,7 +184,7 @@ export const listarRespuestasConPadres = async (idForo) => {
     .from('respuestas_foro')
     .select('idrespuesta, idforo, idcuenta, mensaje, fecha, idrespuesta_padre, cuentas(nombre)')
     .eq('idforo', idForo)
-    .order('fecha', { ascending: false });
+    .order('fecha', { ascending: true });
 
   return { data, error };
 };
