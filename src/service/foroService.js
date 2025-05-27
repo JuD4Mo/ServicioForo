@@ -135,13 +135,12 @@ export const eliminarRespuestaConHijos = async (idRespuesta, idUsuario) => {
     mapa.set(r.idrespuesta_padre, hijos);
   });
 
-  // Buscamos descendientes
   const idsAEliminar = [];
 
   const buscarHijos = (id) => {
     const hijos = mapa.get(id) || [];
-    hijos.forEach(buscarHijos); // primero los hijos
-    idsAEliminar.push(id);      // luego el actual
+    hijos.forEach(buscarHijos); // Recursividad para buscar los hijos
+    idsAEliminar.push(id);     
   };
 
   buscarHijos(idRespuesta);
