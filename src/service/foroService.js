@@ -120,14 +120,14 @@ export const listarRespuestasForo = async(idForo) => {
 };
 
 export const eliminarRespuestaConHijos = async (idRespuesta, idUsuario) => {
+  // 1. Obtener TODAS las respuestas del foro (no solo del usuario)
   const { data: respuestas, error: errorSelect } = await supabase
     .from('respuestas_foro')
-    .select('idrespuesta, idrespuesta_padre')
-    .eq('idcuenta', idUsuario);
+    .select('idrespuesta, idrespuesta_padre');
 
   if (errorSelect) return { data: null, error: errorSelect };
 
-  // Construimos el mapa padre → hijos
+  // 2. Crear mapa padre → hijos
   const mapa = new Map();
   respuestas.forEach(r => {
     const hijos = mapa.get(r.idrespuesta_padre) || [];
@@ -135,16 +135,18 @@ export const eliminarRespuestaConHijos = async (idRespuesta, idUsuario) => {
     mapa.set(r.idrespuesta_padre, hijos);
   });
 
+  // 3. Buscar todos los descendientes recursivamente (hijos, nietos, etc.)
   const idsAEliminar = [];
 
-  const buscarHijos = (id) => {
+  const recolectarDescendientes = (id) => {
     const hijos = mapa.get(id) || [];
-    hijos.forEach(buscarHijos); // Recursividad para buscar los hijos
-    idsAEliminar.push(id);     
+    hijos.forEach(recolectarDescendientes); // primero los hijos
+    idsAEliminar.push(id); // luego el actual
   };
 
-  buscarHijos(idRespuesta);
+  recolectarDescendientes(idRespuesta);
 
+  // 4. Eliminar en orden hijo → padre (ya está en el array en orden correcto)
   const { data, error } = await supabase
     .from('respuestas_foro')
     .delete()
@@ -152,6 +154,7 @@ export const eliminarRespuestaConHijos = async (idRespuesta, idUsuario) => {
 
   return { data, error };
 };
+
 
 
 export const editarRespuesta = async(idRespuesta, idUsuario, mensaje) => {
