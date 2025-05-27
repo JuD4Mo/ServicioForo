@@ -119,8 +119,8 @@ export const listarRespuestasForo = async(idForo) => {
     .order('fecha', { ascending: true });
 };
 
-export const eliminarRespuestaConHijos = async (idRespuesta, idUsuario) => {
-  // 1. Obtener TODAS las respuestas del foro (no solo del usuario)
+export const eliminarRespuestaConHijos = async (idRespuesta) => {
+  // 1. Obtener todas las respuestas
   const { data: respuestas, error: errorSelect } = await supabase
     .from('respuestas_foro')
     .select('idrespuesta, idrespuesta_padre');
@@ -130,23 +130,26 @@ export const eliminarRespuestaConHijos = async (idRespuesta, idUsuario) => {
   // 2. Crear mapa padre → hijos
   const mapa = new Map();
   respuestas.forEach(r => {
-    const hijos = mapa.get(r.idrespuesta_padre) || [];
+    const padreId = r.idrespuesta_padre ?? null;
+    const hijos = mapa.get(padreId) || [];
     hijos.push(r.idrespuesta);
-    mapa.set(r.idrespuesta_padre, hijos);
+    mapa.set(padreId, hijos);
   });
 
-  // 3. Buscar todos los descendientes recursivamente (hijos, nietos, etc.)
+  // 3. Buscar todos los descendientes recursivamente
   const idsAEliminar = [];
 
   const recolectarDescendientes = (id) => {
-    const hijos = mapa.get(id) || [];
-    hijos.forEach(recolectarDescendientes); // primero los hijos
-    idsAEliminar.push(id); // luego el actual
+    const hijos = mapa.get(Number(id)) || [];
+    hijos.forEach(recolectarDescendientes);
+    idsAEliminar.push(Number(id)); // importante: asegurar tipo
   };
 
-  recolectarDescendientes(idRespuesta);
+  recolectarDescendientes(Number(idRespuesta));
 
-  // 4. Eliminar en orden hijo → padre (ya está en el array en orden correcto)
+  console.log("🗑️ Eliminando en orden:", idsAEliminar);
+
+  // 4. Eliminar en orden: hijos → padre
   const { data, error } = await supabase
     .from('respuestas_foro')
     .delete()
@@ -154,7 +157,6 @@ export const eliminarRespuestaConHijos = async (idRespuesta, idUsuario) => {
 
   return { data, error };
 };
-
 
 
 export const editarRespuesta = async(idRespuesta, idUsuario, mensaje) => {

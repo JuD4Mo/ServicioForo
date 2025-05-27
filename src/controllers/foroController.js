@@ -122,9 +122,8 @@ export const getRespuestasForo = async (req, res) => {
 export const deleteRespuesta = async (req, res) => {
   try {
     const idRespuesta = req.params.idrespuesta;
-    const idUsuario = req.body.idcuenta;
 
-    const { data, error } = await foroService.eliminarRespuestaConHijos(idRespuesta, idUsuario);
+    const { data, error } = await foroService.eliminarRespuestaConHijos(idRespuesta);
     if (error) return res.status(400).json({ message: "Error al eliminar respuesta y sus réplicas", error });
 
     await broadcastRespuesta({
