@@ -60,7 +60,7 @@ export const listarForoIdCuenta = async(idCuenta) => {
   return await supabase
     .from('foros')
     .select('idforo, titulo, descripcion, idcuenta, fecha, cuentas(nombre)', 'respuestas_foro(idrespuesta)')
-    .eq('idcuenta', idCuenta);
+    .eq('idcuenta', idCuenta).order('idforo', { ascending: false });
 }
 
 export const actualizarForo = async(idForo, info) => {
