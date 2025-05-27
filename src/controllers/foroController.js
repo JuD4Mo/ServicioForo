@@ -120,19 +120,22 @@ export const getRespuestasForo = async (req, res) => {
 };
 
 export const deleteRespuesta = async (req, res) => {
-    try {
-        const idRespuesta = req.params.idrespuesta;
-        const idUsuario = req.body.idcuenta;
-        const { data, error } = await foroService.eliminarRespuesta(idRespuesta, idUsuario);
-        if (error) return res.status(400).json({ message: "Error al eliminar la respuesta", error: error.message });
-        await broadcastRespuesta({
-        tipo: "respuesta-eliminada",
-        respuesta: { idrespuesta: idRespuesta }
-        });
-        res.status(200).json({ message: "Respuesta eliminada correctamente", data });
-    } catch (error) {
-        res.status(500).json(error.message);
-    }
+  try {
+    const idRespuesta = req.params.idrespuesta;
+    const idUsuario = req.body.idcuenta;
+
+    const { data, error } = await foroService.eliminarRespuestaConHijos(idRespuesta, idUsuario);
+    if (error) return res.status(400).json({ message: "Error al eliminar respuesta y sus réplicas", error });
+
+    await broadcastRespuesta({
+      tipo: "respuesta-eliminada",
+      respuesta: { idrespuesta: idRespuesta }
+    });
+
+    res.status(200).json({ message: "Respuesta y réplicas eliminadas", data });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const updateRespuesta = async (req, res) => {

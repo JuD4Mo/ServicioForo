@@ -119,14 +119,37 @@ export const listarRespuestasForo = async(idForo) => {
     .order('fecha', { ascending: true });
 };
 
-export const eliminarRespuesta = async(idRespuesta, idUsuario) => {
-    return await supabase
+export const eliminarRespuestaConHijos = async (idRespuesta, idUsuario) => {
+  const todas = await supabase
+    .from('respuestas_foro')
+    .select('idrespuesta, idrespuesta_padre')
+    .eq('idcuenta', idUsuario);
+
+  const mapa = new Map();
+  todas.data.forEach(r => {
+    const hijos = mapa.get(r.idrespuesta_padre) || [];
+    hijos.push(r.idrespuesta);
+    mapa.set(r.idrespuesta_padre, hijos);
+  });
+
+  const idsAEliminar = [];
+
+  const buscarHijos = (id) => {
+    idsAEliminar.push(id);
+    const hijos = mapa.get(id) || [];
+    hijos.forEach(buscarHijos);
+  };
+
+  buscarHijos(idRespuesta);
+
+  const { data, error } = await supabase
     .from('respuestas_foro')
     .delete()
-    .eq('idrespuesta', idRespuesta)
-    .eq('idcuenta', idUsuario)
-    .select('*');
+    .in('idrespuesta', idsAEliminar);
+
+  return { data, error };
 };
+
 
 export const editarRespuesta = async(idRespuesta, idUsuario, mensaje) => {
     if (!mensaje) {
