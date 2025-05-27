@@ -120,24 +120,28 @@ export const listarRespuestasForo = async(idForo) => {
 };
 
 export const eliminarRespuestaConHijos = async (idRespuesta, idUsuario) => {
-  const todas = await supabase
+  const { data: respuestas, error: errorSelect } = await supabase
     .from('respuestas_foro')
     .select('idrespuesta, idrespuesta_padre')
     .eq('idcuenta', idUsuario);
 
+  if (errorSelect) return { data: null, error: errorSelect };
+
+  // Construimos el mapa padre → hijos
   const mapa = new Map();
-  todas.data.forEach(r => {
+  respuestas.forEach(r => {
     const hijos = mapa.get(r.idrespuesta_padre) || [];
     hijos.push(r.idrespuesta);
     mapa.set(r.idrespuesta_padre, hijos);
   });
 
+  // Buscamos descendientes
   const idsAEliminar = [];
 
   const buscarHijos = (id) => {
-    idsAEliminar.push(id);
     const hijos = mapa.get(id) || [];
-    hijos.forEach(buscarHijos);
+    hijos.forEach(buscarHijos); // primero los hijos
+    idsAEliminar.push(id);      // luego el actual
   };
 
   buscarHijos(idRespuesta);
