@@ -1,5 +1,6 @@
 import * as foroService from "../service/foroService.js";
 import { broadcastForo, broadcastRespuesta } from "../service/realTime.js";
+import { construirArbolRespuestas } from "../elements/buildTree.js";
 
 export const abrirForo = async (req, res) => {
     try {
@@ -160,4 +161,42 @@ export const cantRespuestas = async (req, res) => {
     } catch (error) {
         res.status(500).json(error.message);
     }
+};
+
+
+export const getRespuestasArbol = async (req, res) => {
+  try {
+    const idForo = req.params.idforo;
+    const { data, error } = await foroService.listarRespuestasConPadres(idForo);
+    if (error) return res.status(400).json({ message: "Error al obtener respuestas", error });
+
+    const arbol = construirArbolRespuestas(data);
+    res.status(200).json(arbol);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+export const replicar = async (req, res) => {
+  try {
+    const idForo = req.params.idforo;
+    const idUsuario = req.body.idcuenta;
+    const info = req.body;
+
+    const { data, error } = await foroService.replicarRespuesta(idForo, idUsuario, info);
+
+    if (error || !data) {
+      return res.status(400).json({ message: "Error al replicar respuesta", error });
+    }
+
+    await broadcastRespuesta({
+      tipo: "nueva-replica",
+      respuesta: data[0]
+    });
+
+    res.status(201).json({ message: "Replica creada correctamente", data });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
