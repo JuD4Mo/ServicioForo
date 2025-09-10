@@ -11,7 +11,7 @@ app.use(cors({
 }))
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/health", (req, res) => res.send("OK"));
+app.get("/health", (req, res) => res.send("OK"));
 app.use("/foro", foroRouter);
 
 const PORT = 3010;
